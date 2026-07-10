@@ -12,13 +12,13 @@ export async function synthesizeSpeech(text: string): Promise<SynthesizeResult> 
 
   switch (provider) {
     case "openai":
-      return synthesizeOpenAI(text);
+      return synthesizeOpenAI();
     case "elevenlabs":
       return synthesizeElevenLabs(text);
     case "mock":
       return synthesizeMock(text);
     case "webSpeech":
     default:
-      return synthesizeWebSpeech(text);
+      return synthesizeWebSpeech();
   }
 }

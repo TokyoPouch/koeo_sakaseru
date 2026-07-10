@@ -16,7 +16,13 @@
 }
 
 body {
-  background: var(--color-sora);
+  background-color: var(--color-sora);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.22 0 0 0 0 0.2 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 60% 42% at 6% 4%, rgba(207, 232, 234, 0.6) 0%, rgba(207, 232, 234, 0.28) 38%, rgba(207, 232, 234, 0) 72%),
+    radial-gradient(ellipse 55% 46% at 96% 94%, rgba(79, 138, 134, 0.16) 0%, rgba(79, 138, 134, 0.07) 42%, rgba(79, 138, 134, 0) 72%);
+  background-repeat: repeat, no-repeat, no-repeat;
+  background-position: 0 0, 0 0, 0 0;
   color: var(--foreground);
   font-family: var(--font-sans);
 }

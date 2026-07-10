@@ -46,7 +46,7 @@ export function AppShell() {
   const handleSpeakInput = () => {
     if (!canSpeakInput) return;
     setActivePhraseId(null);
-    void speak(inputText);
+    void speak(inputText, "__input__");
   };
 
   const handleAddToPhrases = () => {
@@ -68,7 +68,7 @@ export function AppShell() {
 
   const handleSpeakPhrase = (phrase: Phrase) => {
     setActivePhraseId(phrase.id);
-    void speak(phrase.text);
+    void speak(phrase.text, phrase.id);
   };
 
   const handleEditPhrase = (id: string, text: string) => {
@@ -201,7 +201,7 @@ export function AppShell() {
             </div>
 
             <p aria-live="polite" className="mt-3 min-h-[1.5rem] text-center text-sm text-ink/50">
-              {status === "error" && errorMessage}
+              {(status === "error" || status === "notice") && errorMessage}
               {status === "idle" && savedNotice && "このことばを残しました"}
             </p>
           </section>
