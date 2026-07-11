@@ -20,6 +20,8 @@ const COLUMN_CLASS: Record<2 | 3 | 4, string> = {
   4: "grid-cols-4",
 };
 
+const VARIANT_CYCLE: Array<"a" | "b" | "c"> = ["a", "b", "c"];
+
 export function CategorySection({
   title,
   barColorClassName,
@@ -47,6 +49,8 @@ export function CategorySection({
                 icon={getPhraseIcon(phrase.text, phrase.category)}
                 isActive={activePhraseId === phrase.id}
                 tone={tone}
+                variant={VARIANT_CYCLE[index % VARIANT_CYCLE.length]}
+                isUrgent={phrase.category === "urgent"}
                 onSpeak={() => onSpeak(phrase)}
               />
             </div>

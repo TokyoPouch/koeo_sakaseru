@@ -111,7 +111,20 @@ export function AppShell() {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-5 pb-16 pt-10 sm:px-8">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-[720px] flex-col px-5 pb-16 pt-10 sm:px-8 sm:pt-14">
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 200 200"
+        className="motif pointer-events-none absolute -top-2 right-2 h-24 w-24 sm:right-6 sm:h-32 sm:w-32"
+      >
+        <path
+          d="M100 170 C60 150 40 110 55 70 C65 42 90 28 100 20 C110 28 135 42 145 70 C160 110 140 150 100 170 Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+        />
+        <path d="M100 170 C98 130 100 70 100 24" fill="none" stroke="currentColor" strokeWidth="1" />
+      </svg>
       {isEditMode ? (
         <div className="mb-8 flex items-center justify-between gap-4">
           <button
@@ -158,7 +171,7 @@ export function AppShell() {
         </section>
       ) : (
         <>
-          <section className="mb-10 rounded-3xl border border-ink/10 bg-washi/80 p-5 shadow-sm sm:p-7">
+          <section className="washi-canvas mb-10 rounded-[28px] p-6 sm:p-8">
             <label htmlFor="free-input" className="sr-only">
               伝えたいことを入力
             </label>
@@ -171,18 +184,18 @@ export function AppShell() {
                 rows={3}
                 maxLength={MAX_INPUT_LENGTH}
                 autoFocus
-                className="w-full resize-none rounded-2xl border border-ink/10 bg-white/70 px-4 py-3 pb-7 text-lg leading-relaxed text-ink placeholder:text-ink/30 focus:border-aomidori/50 focus:outline-none focus:ring-2 focus:ring-aomidori/20"
+                className="washi-textarea w-full resize-none rounded-2xl px-5 py-4 pb-8 text-lg leading-relaxed text-ink placeholder:text-ink/30"
               />
               <span
-                className={`pointer-events-none absolute bottom-2 right-3 text-xs ${
-                  inputText.length >= MAX_INPUT_LENGTH ? "text-red-500" : "text-ink/40"
+                className={`pointer-events-none absolute bottom-2.5 right-4 text-xs ${
+                  inputText.length >= MAX_INPUT_LENGTH ? "text-red-500" : "text-usuzumi/70"
                 }`}
               >
                 {inputText.length}/{MAX_INPUT_LENGTH}
               </span>
             </div>
 
-            <div className="mt-5 flex items-center justify-center gap-4">
+            <div className="relative z-10 mt-6 flex items-center justify-center gap-4">
               <SpeakButton
                 isSpeaking={isInputSpeaking}
                 disabled={!canSpeakInput && !isInputSpeaking}
@@ -193,14 +206,14 @@ export function AppShell() {
                 onClick={handleAddToPhrases}
                 disabled={!canSpeakInput}
                 aria-label="このことばを残す"
-                className="flex flex-col items-center gap-1 rounded-2xl border border-aomidori/30 bg-white/60 px-4 py-3 text-xs font-medium text-aomidori transition-all active:scale-[0.98] active:opacity-80 disabled:cursor-not-allowed disabled:border-ink/10 disabled:text-ink/30"
+                className="flex flex-col items-center gap-1 rounded-2xl border border-aomidori/25 bg-washi/50 px-4 py-3 text-xs font-medium text-aomidori-deep transition-all active:scale-[0.98] active:opacity-80 disabled:cursor-not-allowed disabled:border-ink/10 disabled:text-ink/30"
               >
-                <Bookmark aria-hidden="true" className="h-5 w-5" />
+                <Bookmark aria-hidden="true" strokeWidth={1.5} className="h-5 w-5" />
                 <span>このことばを残す</span>
               </button>
             </div>
 
-            <p aria-live="polite" className="mt-3 min-h-[1.5rem] text-center text-sm text-ink/50">
+            <p aria-live="polite" className="relative z-10 mt-3 min-h-[1.5rem] text-center text-sm text-ink/50">
               {(status === "error" || status === "notice") && errorMessage}
               {status === "idle" && savedNotice && "このことばを残しました"}
             </p>

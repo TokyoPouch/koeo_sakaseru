@@ -67,7 +67,7 @@ function SortableRow({
     <li
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-1 rounded-xl border border-ink/10 bg-white/70 px-2 py-2 ${
+      className={`flex items-center gap-1 rounded-xl border border-ink/8 bg-washi/70 px-2 py-2 ${
         isDragging ? "shadow-md" : ""
       }`}
     >

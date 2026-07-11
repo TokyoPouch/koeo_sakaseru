@@ -1,30 +1,223 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-washi: #faf7f0;
+  --color-washi: #faf5ea;
+  --color-washi-deep: #f1e8d8;
   --color-ink: #3a3a37;
   --color-mizu: #cfe8ea;
+  --color-mizu-deep: #a9d3d8;
   --color-aomidori: #4f8a86;
+  --color-aomidori-deep: #386664;
   --color-sora: #eaf3f2;
+  --color-momo: #f3dfd9;
+  --color-usuzumi: #8a877e;
   --font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic",
     "Noto Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 :root {
-  --background: var(--color-sora);
+  --background: var(--color-washi);
   --foreground: var(--color-ink);
 }
 
+/* ------------------------------------------------------------------ */
+/* Background: washi base + irregular watercolor bleeds + paper grain */
+/* ------------------------------------------------------------------ */
+
 body {
-  background-color: var(--color-sora);
+  background-color: var(--color-washi);
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.22 0 0 0 0 0.2 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse 60% 42% at 6% 4%, rgba(207, 232, 234, 0.6) 0%, rgba(207, 232, 234, 0.28) 38%, rgba(207, 232, 234, 0) 72%),
-    radial-gradient(ellipse 55% 46% at 96% 94%, rgba(79, 138, 134, 0.16) 0%, rgba(79, 138, 134, 0.07) 42%, rgba(79, 138, 134, 0) 72%);
-  background-repeat: repeat, no-repeat, no-repeat;
-  background-position: 0 0, 0 0, 0 0;
+    /* fine paper grain */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.23 0 0 0 0 0.21 0 0 0 0 0.17 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E"),
+    /* faint fiber lines */
+    repeating-linear-gradient(
+      118deg,
+      rgba(58, 58, 55, 0.025) 0px,
+      rgba(58, 58, 55, 0.025) 1px,
+      transparent 1px,
+      transparent 68px
+    ),
+    repeating-linear-gradient(
+      26deg,
+      rgba(58, 58, 55, 0.02) 0px,
+      rgba(58, 58, 55, 0.02) 1px,
+      transparent 1px,
+      transparent 94px
+    ),
+    /* top-left watercolor bleed: mizu + aomidori, irregular overlap */
+    radial-gradient(ellipse 46% 34% at 4% 2%, rgba(207, 232, 234, 0.75) 0%, rgba(207, 232, 234, 0.4) 45%, rgba(207, 232, 234, 0) 78%),
+    radial-gradient(ellipse 30% 40% at 16% 10%, rgba(79, 138, 134, 0.28) 0%, rgba(79, 138, 134, 0.12) 48%, rgba(79, 138, 134, 0) 80%),
+    radial-gradient(ellipse 22% 26% at 2% 20%, rgba(169, 211, 216, 0.4) 0%, rgba(169, 211, 216, 0.15) 55%, rgba(169, 211, 216, 0) 85%),
+    /* bottom-right watercolor bleed: sora blue + usuzumi ink wash */
+    radial-gradient(ellipse 42% 36% at 98% 96%, rgba(207, 232, 234, 0.55) 0%, rgba(207, 232, 234, 0.22) 46%, rgba(207, 232, 234, 0) 80%),
+    radial-gradient(ellipse 26% 30% at 88% 84%, rgba(138, 135, 126, 0.16) 0%, rgba(138, 135, 126, 0.06) 50%, rgba(138, 135, 126, 0) 82%),
+    radial-gradient(ellipse 20% 22% at 100% 78%, rgba(79, 138, 134, 0.14) 0%, rgba(79, 138, 134, 0.05) 55%, rgba(79, 138, 134, 0) 85%),
+    /* base washi tone, deeper toward edges to keep center bright & readable */
+    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(250, 245, 234, 0.9) 0%, rgba(241, 232, 216, 0.55) 100%);
+  background-repeat: repeat, repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* ------------------------------------------------------------------ */
+/* Washi canvas (input card) */
+/* ------------------------------------------------------------------ */
+
+.washi-canvas {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(250, 245, 234, 0.55);
+  border: 1px solid rgba(58, 58, 55, 0.06);
+  box-shadow: 0 1px 2px rgba(58, 58, 55, 0.04), 0 8px 20px -12px rgba(58, 58, 55, 0.12);
+}
+
+.washi-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse 38% 30% at 92% 8%, rgba(79, 138, 134, 0.1) 0%, rgba(79, 138, 134, 0.04) 55%, rgba(79, 138, 134, 0) 80%),
+    radial-gradient(ellipse 34% 26% at 6% 96%, rgba(207, 232, 234, 0.5) 0%, rgba(207, 232, 234, 0.18) 55%, rgba(207, 232, 234, 0) 85%);
+}
+
+.washi-textarea {
+  background-color: rgba(255, 253, 248, 0.5);
+  border: 1px solid rgba(58, 58, 55, 0.08);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.washi-textarea:focus {
+  outline: none;
+  border-color: rgba(79, 138, 134, 0.45);
+  background-color: rgba(255, 253, 248, 0.72);
+  box-shadow: 0 0 0 3px rgba(79, 138, 134, 0.12);
+}
+
+/* ------------------------------------------------------------------ */
+/* Speak button: watercolor color-mingled orb + irregular ripples */
+/* ------------------------------------------------------------------ */
+
+.speak-orb {
+  position: relative;
+  border-radius: 9999px;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 38% 32%, rgba(234, 243, 242, 0.9) 0%, rgba(207, 232, 234, 0.55) 24%, transparent 46%),
+    radial-gradient(circle at 68% 70%, rgba(56, 102, 100, 0.55) 0%, rgba(56, 102, 100, 0.15) 40%, transparent 62%),
+    linear-gradient(155deg, var(--color-mizu) 0%, var(--color-aomidori) 62%, var(--color-aomidori-deep) 100%);
+  box-shadow: 0 2px 4px rgba(58, 58, 55, 0.08), 0 14px 28px -14px rgba(56, 102, 100, 0.45);
+}
+
+.speak-orb::before,
+.speak-orb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+}
+
+.speak-orb::before {
+  background: radial-gradient(ellipse 55% 42% at 30% 78%, rgba(255, 255, 255, 0.55) 0%, transparent 68%);
+}
+
+.speak-orb::after {
+  background: radial-gradient(ellipse 46% 60% at 80% 24%, rgba(20, 40, 40, 0.35) 0%, transparent 70%);
+}
+
+.speak-orb--playing {
+  background:
+    radial-gradient(circle at 40% 30%, rgba(224, 240, 245, 0.85) 0%, rgba(148, 197, 214, 0.5) 26%, transparent 48%),
+    radial-gradient(circle at 66% 72%, rgba(15, 55, 90, 0.55) 0%, rgba(15, 55, 90, 0.18) 42%, transparent 64%),
+    linear-gradient(155deg, #9fcbdd 0%, #2f6f92 58%, #123c58 100%);
+  box-shadow: 0 2px 4px rgba(58, 58, 55, 0.08), 0 14px 30px -14px rgba(18, 60, 88, 0.55);
+}
+
+.ripple-ring {
+  position: absolute;
+  border-radius: 48% 52% 47% 53% / 53% 47% 53% 47%;
+  border-style: solid;
+  pointer-events: none;
+}
+
+@keyframes ripple-out {
+  0% {
+    transform: scale(0.94) rotate(0deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.1) rotate(2deg);
+    opacity: 0;
+  }
+}
+
+.animate-ripple {
+  animation: ripple-out 3.2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ripple {
+    animation: none;
+    opacity: 0.22;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Phrase cards: quiet tonal rhythm, work-of-art feel */
+/* ------------------------------------------------------------------ */
+
+.phrase-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(58, 58, 55, 0.07);
+  box-shadow: 0 1px 1px rgba(58, 58, 55, 0.03), 0 6px 14px -10px rgba(58, 58, 55, 0.18);
+}
+
+.phrase-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.phrase-card--a {
+  background-color: rgba(250, 245, 234, 0.9);
+}
+.phrase-card--a::before {
+  background: radial-gradient(ellipse 60% 50% at 90% 100%, rgba(79, 138, 134, 0.07) 0%, transparent 70%);
+}
+
+.phrase-card--b {
+  background-color: rgba(234, 243, 242, 0.55);
+}
+.phrase-card--b::before {
+  background: radial-gradient(ellipse 55% 45% at 6% 0%, rgba(207, 232, 234, 0.5) 0%, transparent 72%);
+}
+
+.phrase-card--c {
+  background-color: rgba(243, 223, 217, 0.4);
+}
+.phrase-card--c::before {
+  background: radial-gradient(ellipse 55% 45% at 100% 0%, rgba(243, 223, 217, 0.55) 0%, transparent 72%);
+}
+
+.phrase-card--urgent {
+  border-left: 2px solid rgba(79, 138, 134, 0.45);
+}
+
+/* ------------------------------------------------------------------ */
+/* Organic motifs (very low opacity, decorative only) */
+/* ------------------------------------------------------------------ */
+
+.motif {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.14;
+  color: var(--color-aomidori-deep);
 }
 
 @keyframes breathe {
