@@ -1,4 +1,4 @@
-export type PhraseCategory = "urgent" | "daily" | "response";
+export type PhraseCategory = "urgent" | "daily" | "response" | "favorite";
 
 export interface Phrase {
   id: string;

@@ -17,27 +17,24 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { CATEGORY_LABEL, CATEGORY_TAG_CLASSNAME } from "@/lib/categoryMeta";
 import type { Phrase, PhraseCategory } from "@/types/phrase";
 
 interface EditModeListProps {
   phrases: Phrase[];
   onReorder: (next: Phrase[]) => void;
-  onEdit: (id: string, text: string) => void;
+  onEdit: (id: string, text: string, category: PhraseCategory) => void;
   onDelete: (phrase: Phrase) => void;
   onAdd: (text: string, category: PhraseCategory) => void;
 }
-
-const CATEGORY_LABEL: Record<PhraseCategory, string> = {
-  urgent: "すぐ伝えたい",
-  daily: "日常",
-  response: "返事",
-};
 
 interface SortableRowProps {
   phrase: Phrase;
   isEditing: boolean;
   draftText: string;
+  draftCategory: PhraseCategory;
   onDraftChange: (value: string) => void;
+  onDraftCategoryChange: (value: PhraseCategory) => void;
   onStartEdit: () => void;
   onConfirmEdit: () => void;
   onCancelEdit: () => void;
@@ -48,7 +45,9 @@ function SortableRow({
   phrase,
   isEditing,
   draftText,
+  draftCategory,
   onDraftChange,
+  onDraftCategoryChange,
   onStartEdit,
   onConfirmEdit,
   onCancelEdit,
@@ -95,22 +94,46 @@ function SortableRow({
             maxLength={120}
             className="w-full resize-none rounded-xl border border-aomidori/30 bg-white px-3 py-2 text-base text-ink focus:border-aomidori/50 focus:outline-none focus:ring-2 focus:ring-aomidori/20"
           />
-          <div className="flex justify-end gap-3">
-            <button type="button" onClick={onCancelEdit} className="px-2 py-1 text-sm text-ink/50">
-              やめる
-            </button>
-            <button
-              type="button"
-              onClick={onConfirmEdit}
-              disabled={draftText.trim().length === 0}
-              className="rounded-lg bg-aomidori px-4 py-1.5 text-sm font-medium text-white disabled:bg-ink/20"
+          <div className="flex items-center justify-between gap-2">
+            <label htmlFor={`edit-category-${phrase.id}`} className="sr-only">
+              カテゴリを選ぶ
+            </label>
+            <select
+              id={`edit-category-${phrase.id}`}
+              value={draftCategory}
+              onChange={(e) => onDraftCategoryChange(e.target.value as PhraseCategory)}
+              className="rounded-lg border border-ink/10 bg-white px-2 py-2 text-sm text-ink"
             >
-              保存する
-            </button>
+              {(Object.keys(CATEGORY_LABEL) as PhraseCategory[]).map((key) => (
+                <option key={key} value={key}>
+                  {CATEGORY_LABEL[key]}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-3">
+              <button type="button" onClick={onCancelEdit} className="px-2 py-1 text-sm text-ink/50">
+                やめる
+              </button>
+              <button
+                type="button"
+                onClick={onConfirmEdit}
+                disabled={draftText.trim().length === 0}
+                className="rounded-lg bg-aomidori px-4 py-1.5 text-sm font-medium text-white disabled:bg-ink/20"
+              >
+                保存する
+              </button>
+            </div>
           </div>
         </div>
       ) : (
-        <span className="flex-1 truncate px-1 text-base text-ink">{phrase.text}</span>
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5 px-1 py-0.5">
+          <span
+            className={`w-fit shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ${CATEGORY_TAG_CLASSNAME[phrase.category]}`}
+          >
+            {CATEGORY_LABEL[phrase.category]}
+          </span>
+          <span className="truncate text-base text-ink">{phrase.text}</span>
+        </span>
       )}
 
       {!isEditing && (
@@ -140,6 +163,7 @@ function SortableRow({
 export function EditModeList({ phrases, onReorder, onEdit, onDelete, onAdd }: EditModeListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftText, setDraftText] = useState("");
+  const [draftCategory, setDraftCategory] = useState<PhraseCategory>("daily");
   const [isAdding, setIsAdding] = useState(false);
   const [newText, setNewText] = useState("");
   const [newCategory, setNewCategory] = useState<PhraseCategory>("daily");
@@ -151,6 +175,7 @@ export function EditModeList({ phrases, onReorder, onEdit, onDelete, onAdd }: Ed
   const startEdit = (phrase: Phrase) => {
     setEditingId(phrase.id);
     setDraftText(phrase.text);
+    setDraftCategory(phrase.category);
   };
 
   const cancelEdit = () => {
@@ -160,7 +185,7 @@ export function EditModeList({ phrases, onReorder, onEdit, onDelete, onAdd }: Ed
 
   const confirmEdit = () => {
     if (editingId && draftText.trim().length > 0) {
-      onEdit(editingId, draftText);
+      onEdit(editingId, draftText, draftCategory);
     }
     cancelEdit();
   };
@@ -198,7 +223,9 @@ export function EditModeList({ phrases, onReorder, onEdit, onDelete, onAdd }: Ed
                 phrase={phrase}
                 isEditing={editingId === phrase.id}
                 draftText={draftText}
+                draftCategory={draftCategory}
                 onDraftChange={setDraftText}
+                onDraftCategoryChange={setDraftCategory}
                 onStartEdit={() => startEdit(phrase)}
                 onConfirmEdit={confirmEdit}
                 onCancelEdit={cancelEdit}

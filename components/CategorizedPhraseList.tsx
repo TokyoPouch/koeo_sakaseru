@@ -1,7 +1,9 @@
 "use client";
 
-import { CategorySection } from "@/components/CategorySection";
-import type { Phrase } from "@/types/phrase";
+import { Sparkle, type LucideIcon } from "lucide-react";
+import { CategorySection, type CategoryDisplayKind } from "@/components/CategorySection";
+import { useCategoryOrder } from "@/lib/storage";
+import type { Phrase, PhraseCategory } from "@/types/phrase";
 
 interface CategorizedPhraseListProps {
   phrases: Phrase[];
@@ -9,46 +11,73 @@ interface CategorizedPhraseListProps {
   onSpeak: (phrase: Phrase) => void;
 }
 
+interface CategoryConfig {
+  title: string;
+  barColorClassName: string;
+  displayKind: CategoryDisplayKind;
+  tileColumns?: 2 | 3 | 4;
+  tone?: "neutral" | "response";
+  headingIcon?: LucideIcon;
+}
+
+const CATEGORY_CONFIG: Record<PhraseCategory, CategoryConfig> = {
+  urgent: {
+    title: "すぐ伝えたい",
+    barColorClassName: "bg-aomidori",
+    displayKind: "row-stack",
+    headingIcon: Sparkle,
+  },
+  daily: {
+    title: "日常",
+    barColorClassName: "bg-mizu",
+    displayKind: "row-grid-2",
+  },
+  response: {
+    title: "返事",
+    barColorClassName: "bg-sky-400",
+    displayKind: "tile-grid",
+    tileColumns: 4,
+    tone: "response",
+  },
+  favorite: {
+    title: "よく使う",
+    barColorClassName: "bg-kinari-deep",
+    displayKind: "tile-grid",
+    tileColumns: 2,
+  },
+};
+
 function byOrder(a: Phrase, b: Phrase): number {
   return a.order - b.order;
 }
 
 export function CategorizedPhraseList({ phrases, activePhraseId, onSpeak }: CategorizedPhraseListProps) {
+  const categoryOrder = useCategoryOrder();
+
   if (phrases.length === 0) {
     return <p className="text-sm text-ink/50">まだ言葉が登録されていません。</p>;
   }
 
-  const urgent = phrases.filter((p) => p.category === "urgent").sort(byOrder);
-  const daily = phrases.filter((p) => p.category === "daily").sort(byOrder);
-  const response = phrases.filter((p) => p.category === "response").sort(byOrder);
-
   return (
     <div>
-      <CategorySection
-        title="すぐ伝えたい"
-        barColorClassName="bg-aomidori"
-        columns={3}
-        phrases={urgent}
-        activePhraseId={activePhraseId}
-        onSpeak={onSpeak}
-      />
-      <CategorySection
-        title="日常"
-        barColorClassName="bg-mizu"
-        columns={2}
-        phrases={daily}
-        activePhraseId={activePhraseId}
-        onSpeak={onSpeak}
-      />
-      <CategorySection
-        title="返事"
-        barColorClassName="bg-sky-400"
-        columns={4}
-        tone="response"
-        phrases={response}
-        activePhraseId={activePhraseId}
-        onSpeak={onSpeak}
-      />
+      {categoryOrder.map((category) => {
+        const config = CATEGORY_CONFIG[category];
+        const grouped = phrases.filter((p) => p.category === category).sort(byOrder);
+        return (
+          <CategorySection
+            key={category}
+            title={config.title}
+            barColorClassName={config.barColorClassName}
+            headingIcon={config.headingIcon}
+            displayKind={config.displayKind}
+            tileColumns={config.tileColumns}
+            tone={config.tone}
+            phrases={grouped}
+            activePhraseId={activePhraseId}
+            onSpeak={onSpeak}
+          />
+        );
+      })}
     </div>
   );
 }

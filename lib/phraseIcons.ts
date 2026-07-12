@@ -31,6 +31,6 @@ const ICON_BY_TEXT: Record<string, LucideIcon> = {
 };
 
 export function getPhraseIcon(text: string, category: PhraseCategory): LucideIcon | null {
-  if (category === "response") return null;
+  if (category === "response" || category === "daily") return null;
   return ICON_BY_TEXT[text] ?? null;
 }

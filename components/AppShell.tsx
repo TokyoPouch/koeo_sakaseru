@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Bookmark } from "lucide-react";
 import { useTextSpeaker } from "@/components/TextSpeaker";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CategorizedPhraseList } from "@/components/CategorizedPhraseList";
+import { CategoryOrderList } from "@/components/CategoryOrderList";
 import { EditModeList } from "@/components/EditModeList";
 import { UndoToast } from "@/components/UndoToast";
-import { usePhrases, commitPhrases } from "@/lib/storage";
+import { usePhrases, commitPhrases, useCategoryOrder, commitCategoryOrder } from "@/lib/storage";
 import type { Phrase, PhraseCategory } from "@/types/phrase";
 
 const MAX_INPUT_LENGTH = 120;
@@ -26,6 +28,7 @@ function nextOrder(phrases: Phrase[]): number {
 export function AppShell() {
   const [inputText, setInputText] = useState("");
   const phrases = usePhrases();
+  const categoryOrder = useCategoryOrder();
   const [activePhraseId, setActivePhraseId] = useState<string | null>(null);
   const [savedNotice, setSavedNotice] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -58,7 +61,7 @@ export function AppShell() {
         id: createPhraseId(),
         text: trimmed,
         createdAt: Date.now(),
-        category: "daily" as PhraseCategory,
+        category: "favorite" as PhraseCategory,
         order: nextOrder(phrases),
       },
     ];
@@ -71,10 +74,10 @@ export function AppShell() {
     void speak(phrase.text, phrase.id);
   };
 
-  const handleEditPhrase = (id: string, text: string) => {
+  const handleEditPhrase = (id: string, text: string, category: PhraseCategory) => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    const next = phrases.map((p) => (p.id === id ? { ...p, text: trimmed } : p));
+    const next = phrases.map((p) => (p.id === id ? { ...p, text: trimmed, category } : p));
     commitPhrases(next);
   };
 
@@ -108,6 +111,10 @@ export function AppShell() {
       },
     ];
     commitPhrases(next);
+  };
+
+  const handleReorderCategories = (next: PhraseCategory[]) => {
+    commitCategoryOrder(next);
   };
 
   return (
@@ -144,12 +151,19 @@ export function AppShell() {
           </button>
         </div>
       ) : (
-        <header className="mb-8 flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-light tracking-wide text-ink sm:text-3xl">こえを咲かせる</h1>
+        <header className="relative mb-8 flex h-9 items-center justify-end sm:h-10">
+          <Image
+            src="/logo/koe_logo.png"
+            alt="声を咲かせる"
+            width={400}
+            height={100}
+            preload
+            className="pointer-events-none absolute left-1/2 h-7 w-auto -translate-x-1/2 select-none sm:h-8"
+          />
           <button
             type="button"
             onClick={() => setIsEditMode(true)}
-            className="shrink-0 rounded-full border border-ink/20 px-4 py-2 text-sm font-medium text-ink/70 transition-colors active:bg-ink/5"
+            className="relative shrink-0 rounded-full border border-ink/20 px-4 py-2 text-sm font-medium text-ink/70 transition-colors active:bg-ink/5"
           >
             整える
           </button>
@@ -161,6 +175,7 @@ export function AppShell() {
           <h2 id="edit-list-heading" className="sr-only">
             ことばを整える
           </h2>
+          <CategoryOrderList categoryOrder={categoryOrder} onReorder={handleReorderCategories} />
           <EditModeList
             phrases={phrases}
             onReorder={handleReorder}
@@ -206,7 +221,7 @@ export function AppShell() {
                 onClick={handleAddToPhrases}
                 disabled={!canSpeakInput}
                 aria-label="このことばを残す"
-                className="flex flex-col items-center gap-1 rounded-2xl border border-aomidori/25 bg-washi/50 px-4 py-3 text-xs font-medium text-aomidori-deep transition-all active:scale-[0.98] active:opacity-80 disabled:cursor-not-allowed disabled:border-ink/10 disabled:text-ink/30"
+                className="flex flex-col items-center gap-1 rounded-2xl border border-aomidori/20 bg-transparent px-4 py-3 text-xs font-medium text-aomidori-deep/80 transition-all active:scale-[0.98] active:opacity-80 disabled:cursor-not-allowed disabled:border-ink/10 disabled:text-ink/30"
               >
                 <Bookmark aria-hidden="true" strokeWidth={1.5} className="h-5 w-5" />
                 <span>このことばを残す</span>

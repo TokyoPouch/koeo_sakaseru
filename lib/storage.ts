@@ -3,7 +3,9 @@ import type { Phrase, PhraseCategory } from "@/types/phrase";
 import { defaultPhrases } from "@/lib/defaultPhrases";
 
 const STORAGE_KEY = "koeo-sakaseru:phrases";
-const CATEGORIES: readonly PhraseCategory[] = ["urgent", "daily", "response"];
+const CATEGORY_ORDER_KEY = "koeo-sakaseru:categoryOrder";
+const CATEGORIES: readonly PhraseCategory[] = ["urgent", "daily", "response", "favorite"];
+const DEFAULT_CATEGORY_ORDER: readonly PhraseCategory[] = ["urgent", "daily", "response", "favorite"];
 
 function isKnownCategory(value: unknown): value is PhraseCategory {
   return typeof value === "string" && (CATEGORIES as readonly string[]).includes(value);
@@ -85,4 +87,78 @@ export function commitPhrases(next: Phrase[]): void {
 
 export function usePhrases(): Phrase[] {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+// カテゴリー表示順（整える画面で並べ替え可能）。フレーズ本体とは別キーで保存する。
+function migrateCategoryOrder(raw: string | null): PhraseCategory[] {
+  const known: PhraseCategory[] = [];
+  if (raw) {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        for (const item of parsed) {
+          if (isKnownCategory(item) && !known.includes(item)) known.push(item);
+        }
+      }
+    } catch {
+      // 壊れたデータはデフォルト順で補完する
+    }
+  }
+  // 保存されていない・新しく追加されたカテゴリーは末尾に補う
+  for (const category of DEFAULT_CATEGORY_ORDER) {
+    if (!known.includes(category)) known.push(category);
+  }
+  return known;
+}
+
+function readCategoryOrderFromStorage(): PhraseCategory[] {
+  try {
+    const raw = window.localStorage.getItem(CATEGORY_ORDER_KEY);
+    const migrated = migrateCategoryOrder(raw);
+    writeCategoryOrderToStorage(migrated);
+    return migrated;
+  } catch {
+    return [...DEFAULT_CATEGORY_ORDER];
+  }
+}
+
+function writeCategoryOrderToStorage(order: PhraseCategory[]): void {
+  try {
+    window.localStorage.setItem(CATEGORY_ORDER_KEY, JSON.stringify(order));
+  } catch {
+    // localStorageが使えない環境（プライベートモード等）では保存をスキップする
+  }
+}
+
+let cachedCategoryOrder: PhraseCategory[] | null = null;
+const categoryOrderListeners = new Set<() => void>();
+
+function emitCategoryOrderChange(): void {
+  for (const listener of categoryOrderListeners) listener();
+}
+
+function subscribeCategoryOrder(listener: () => void): () => void {
+  categoryOrderListeners.add(listener);
+  return () => categoryOrderListeners.delete(listener);
+}
+
+function getCategoryOrderSnapshot(): PhraseCategory[] {
+  if (cachedCategoryOrder === null) {
+    cachedCategoryOrder = readCategoryOrderFromStorage();
+  }
+  return cachedCategoryOrder;
+}
+
+function getCategoryOrderServerSnapshot(): PhraseCategory[] {
+  return DEFAULT_CATEGORY_ORDER as PhraseCategory[];
+}
+
+export function commitCategoryOrder(next: PhraseCategory[]): void {
+  cachedCategoryOrder = next;
+  writeCategoryOrderToStorage(next);
+  emitCategoryOrderChange();
+}
+
+export function useCategoryOrder(): PhraseCategory[] {
+  return useSyncExternalStore(subscribeCategoryOrder, getCategoryOrderSnapshot, getCategoryOrderServerSnapshot);
 }
